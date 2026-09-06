@@ -1,0 +1,12 @@
+# Dependencias para un despliegue tipo producción.
+# La demo NO va a producción; este archivo queda como referencia
+# y para que la imagen Docker "prod" sea representativa.
+# Uso: pip install -r requirements/production.txt
+
+-r base.txt
+
+# Servidor WSGI
+gunicorn~=23.0
+
+# Servir archivos estáticos sin un nginx aparte
+whitenoise~=6.8

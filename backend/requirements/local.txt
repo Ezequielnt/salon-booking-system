@@ -1,0 +1,15 @@
+# Dependencias solo para desarrollo local / testing.
+# Uso: pip install -r requirements/local.txt
+
+-r base.txt
+
+# Testing
+pytest~=8.3
+pytest-django~=4.9
+factory-boy~=3.3
+
+# Calidad de código
+ruff~=0.9
+
+# Utilidades de desarrollo (shell_plus, runserver_plus, graph_models)
+django-extensions~=3.2

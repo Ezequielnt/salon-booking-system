@@ -1,0 +1,31 @@
+# Dependencias comunes a todos los entornos.
+# Se instalan siempre (local y producción parten de este archivo).
+
+Django~=5.2
+djangorestframework~=3.16
+
+# Auth por JWT
+djangorestframework-simplejwt~=5.5
+
+# CORS para que el frontend (Vite) pueda pegarle a la API
+django-cors-headers~=4.7
+
+# Filtros y paginación en los endpoints
+django-filter~=25.1
+
+# Documentación OpenAPI / Swagger de la API
+drf-spectacular~=0.28
+
+# Driver PostgreSQL (v3). El extra [binary] evita compilar en el build.
+psycopg[binary]~=3.2
+
+# Lectura de configuración desde variables de entorno / .env
+django-environ~=0.12
+
+# Cola de tareas asíncronas (emails, recordatorios) + broker
+celery~=5.5
+redis~=5.2
+
+# SDK de pagos (Argentina). El proveedor real es opcional:
+# por defecto el sistema usa un proveedor "fake" para la demo.
+mercadopago~=2.3
