@@ -104,7 +104,9 @@ class Reserva(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Reserva #{self.pk} · {self.inicio:%d/%m/%Y %H:%M} ({self.get_estado_display()})"
+        inicio_local = timezone.localtime(self.inicio) if self.inicio else None
+        cuando = f"{inicio_local:%d/%m/%Y %H:%M}" if inicio_local else "sin fecha"
+        return f"Reserva #{self.pk} · {cuando} ({self.get_estado_display()})"
 
     def clean(self):
         if self.inicio and self.fin and self.inicio >= self.fin:

@@ -25,6 +25,10 @@ ENV/
 .env.*
 !.env.example
 
+# ---- Celery ----
+celerybeat-schedule*
+celerybeat.pid
+
 # ---- Testing / coverage ----
 .pytest_cache/
 .coverage
