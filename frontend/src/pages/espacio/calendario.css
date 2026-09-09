@@ -1,0 +1,81 @@
+/* Tema de FullCalendar acorde al diseño (verde salvia + esquinas redondeadas). */
+
+.calendario {
+  --fc-border-color: var(--line);
+  --fc-page-bg-color: var(--surface);
+  --fc-neutral-bg-color: var(--surface-2);
+  --fc-today-bg-color: #f2f6ea;
+  --fc-now-indicator-color: var(--accent-deep);
+  --fc-button-bg-color: var(--surface-2);
+  --fc-button-border-color: transparent;
+  --fc-button-text-color: var(--ink);
+  --fc-button-hover-bg-color: var(--line);
+  --fc-button-hover-border-color: transparent;
+  --fc-button-active-bg-color: var(--accent);
+  --fc-button-active-border-color: var(--accent);
+  padding: 1.25rem;
+}
+
+.calendario .fc {
+  font-family: var(--font);
+}
+.calendario .fc .fc-toolbar-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.calendario .fc .fc-button {
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  box-shadow: none;
+  text-transform: capitalize;
+}
+.calendario .fc .fc-button-primary:not(:disabled).fc-button-active {
+  color: #fff;
+}
+.calendario .fc .fc-button-group > .fc-button {
+  border-radius: 999px;
+}
+.calendario .fc .fc-button-group > .fc-button:not(:last-child) {
+  margin-right: 0.25rem;
+}
+.calendario .fc .fc-col-header-cell-cushion,
+.calendario .fc .fc-daygrid-day-number {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 500;
+}
+.calendario .fc .fc-timegrid-slot-label-cushion {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+/* Eventos */
+.calendario .fc-event {
+  border: none;
+  border-radius: 6px;
+  padding: 1px 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.calendario .ev-reserva {
+  background: #c9ccc2;
+  color: #3f423b;
+}
+.calendario .ev-bloqueo {
+  background: var(--bad-bg);
+  color: var(--bad-ink);
+}
+.calendario .fc-highlight {
+  background: var(--accent-tint);
+}
+
+@media (max-width: 720px) {
+  .calendario .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

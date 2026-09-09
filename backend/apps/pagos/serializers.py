@@ -37,3 +37,18 @@ class PagoSerializer(serializers.ModelSerializer):
         if monto <= 0:
             raise serializers.ValidationError("El monto debe ser mayor a cero.")
         return monto
+
+
+class CheckoutSerializer(serializers.Serializer):
+    """Respuesta de `POST /pagos/{id}/checkout/`."""
+
+    checkout_url = serializers.URLField()
+    token = serializers.CharField()
+    monto = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+
+class CheckoutResolverSerializer(serializers.Serializer):
+    """Body del callback del checkout fake."""
+
+    token = serializers.CharField()
+    resultado = serializers.ChoiceField(choices=["aprobado", "rechazado"])

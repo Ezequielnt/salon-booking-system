@@ -1,45 +1,59 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy } from "react";
+import { Route, Routes } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
+import AppLayout from "@/components/AppLayout";
+import { Cargando } from "@/components/Estado";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicLayout from "@/components/PublicLayout";
+import HomePage from "@/pages/HomePage";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import SalonDetallePage from "@/pages/SalonDetallePage";
+import SalonesPage from "@/pages/SalonesPage";
+import {
+  CheckoutPage,
+  MisReservasPage,
+  NotFoundPage,
+  PanelCalendarioPage,
+  PanelReservasPage,
+  PanelSalonPage,
+} from "@/pages/stubs";
+
+// FullCalendar es pesado: se carga solo al entrar a la pantalla del espacio.
+const EspacioPage = lazy(() => import("@/pages/espacio/EspacioPage"));
 
 export default function App() {
-  const [estado, setEstado] = useState("comprobando API…");
-
-  useEffect(() => {
-    fetch(`${API_URL}/schema/`)
-      .then((r) => setEstado(r.ok ? "conectado ✓" : `respondió ${r.status}`))
-      .catch(() => setEstado("no disponible ✗"));
-  }, []);
-
   return (
-    <main
-      style={{
-        fontFamily: "system-ui, sans-serif",
-        maxWidth: 640,
-        margin: "0 auto",
-        padding: "2rem",
-        lineHeight: 1.5,
-      }}
-    >
-      <h1>Salón Booking</h1>
-      <p>Demo de sistema de reservas de salones de eventos.</p>
-      <p>
-        Backend: <strong>{estado}</strong>
-      </p>
-      <ul>
-        <li>
-          <a href="http://localhost:8000/admin/">Admin de Django</a> — admin / admin
-        </li>
-        <li>
-          <a href="http://localhost:8000/api/v1/docs/">Documentación de la API (Swagger)</a>
-        </li>
-        <li>
-          <a href="http://localhost:8025/">Mailpit</a> — emails de prueba
-        </li>
-      </ul>
-      <p style={{ color: "#666" }}>
-        El calendario (FullCalendar) y el flujo de reserva se implementan más adelante.
-      </p>
-    </main>
+    <Suspense fallback={<Cargando />}>
+      <Routes>
+        {/* Sin sesión */}
+        <Route element={<PublicLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="registro" element={<RegisterPage />} />
+          <Route path="checkout/:token" element={<CheckoutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+
+        {/* Cliente + dueño */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="salones" element={<SalonesPage />} />
+            <Route path="salones/:id" element={<SalonDetallePage />} />
+            <Route path="espacios/:espacioId" element={<EspacioPage />} />
+            <Route path="mis-reservas" element={<MisReservasPage />} />
+          </Route>
+        </Route>
+
+        {/* Solo dueño */}
+        <Route element={<ProtectedRoute rol="admin_salon" />}>
+          <Route element={<AppLayout />}>
+            <Route path="panel" element={<PanelSalonPage />} />
+            <Route path="panel/reservas" element={<PanelReservasPage />} />
+            <Route path="panel/calendario" element={<PanelCalendarioPage />} />
+          </Route>
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }

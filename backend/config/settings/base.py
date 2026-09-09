@@ -198,3 +198,8 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@salon.local")
 # "fake" (por defecto, no requiere cuenta) | "mercadopago"
 PAYMENTS_PROVIDER = env("PAYMENTS_PROVIDER", default="fake")
 MERCADOPAGO_ACCESS_TOKEN = env("MERCADOPAGO_ACCESS_TOKEN", default="")
+
+# Base del frontend, para armar la `checkout_url` del pago fake.
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+# Validez del token de checkout (segundos).
+PAYMENTS_CHECKOUT_TTL = env.int("PAYMENTS_CHECKOUT_TTL", default=3600)

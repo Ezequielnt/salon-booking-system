@@ -3,11 +3,17 @@ from rest_framework import mixins, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.usuarios.models import Rol
 
+from . import services
 from .models import EstadoPago, Pago, TransicionInvalida
-from .serializers import PagoSerializer
+from .serializers import (
+    CheckoutResolverSerializer,
+    CheckoutSerializer,
+    PagoSerializer,
+)
 
 
 class PagoViewSet(
@@ -18,9 +24,10 @@ class PagoViewSet(
 ):
     """Pagos de una reserva (seña / saldo).
 
-    No se editan ni borran: un pago avanza por su máquina de estados con las
-    acciones `aprobar` / `rechazar` / `reembolsar`, que simulan el webhook del
-    proveedor (en la demo el proveedor es "fake").
+    No se editan ni borran: un pago avanza por su máquina de estados. El cliente
+    arranca el pago con `checkout` (devuelve una URL a la pantalla de pago fake);
+    el salón puede registrar el resultado a mano con `aprobar` / `rechazar` /
+    `reembolsar`.
     """
 
     queryset = Pago.objects.none()  # el real se arma en get_queryset()
@@ -54,10 +61,21 @@ class PagoViewSet(
             raise ValidationError(str(exc))
         return Response(self.get_serializer(pago).data)
 
+    @extend_schema(request=None, responses=CheckoutSerializer)
+    @action(detail=True, methods=["post"])
+    def checkout(self, request, pk=None):
+        """Inicia el pago. Devuelve la URL de la pantalla de pago (fake)."""
+        pago = self.get_object()
+        try:
+            datos = services.crear_checkout(pago)
+        except services.CheckoutInvalido as exc:
+            raise ValidationError(str(exc))
+        return Response(CheckoutSerializer(datos).data)
+
     @extend_schema(request=None, responses=PagoSerializer)
     @action(detail=True, methods=["post"])
     def aprobar(self, request, pk=None):
-        """Simula la aprobación del proveedor. Si es la seña, confirma la reserva."""
+        """Marca el pago como aprobado (uso del salón). Si es seña, confirma la reserva."""
         return self._transicionar(EstadoPago.APROBADO)
 
     @extend_schema(request=None, responses=PagoSerializer)
@@ -69,3 +87,26 @@ class PagoViewSet(
     @action(detail=True, methods=["post"])
     def reembolsar(self, request, pk=None):
         return self._transicionar(EstadoPago.REEMBOLSADO)
+
+
+class CheckoutResolverView(APIView):
+    """POST /api/v1/pagos/checkout/resolver/
+
+    "Callback" de la pantalla de pago fake — equivale al webhook que mandaría
+    Mercado Pago / Stripe. El token firmado hace de credencial: no requiere JWT.
+    """
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes: list = []
+
+    @extend_schema(request=CheckoutResolverSerializer, responses=PagoSerializer)
+    def post(self, request):
+        body = CheckoutResolverSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        try:
+            pago = services.resolver_checkout(
+                body.validated_data["token"], body.validated_data["resultado"]
+            )
+        except services.CheckoutInvalido as exc:
+            raise ValidationError(str(exc))
+        return Response(PagoSerializer(pago, context={"request": request}).data)
