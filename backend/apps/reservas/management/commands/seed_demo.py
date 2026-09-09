@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from apps.disponibilidad.models import BloqueoFecha, DiaSemana, ReglaDisponibilidad
 from apps.pagos.models import EstadoPago, Pago, TipoPago
-from apps.reservas.models import EstadoReserva, Reserva
+from apps.reservas.models import Reserva
 from apps.salones.models import Espacio, Salon
 from apps.usuarios.models import Rol
 
@@ -103,15 +103,16 @@ class Command(BaseCommand):
             },
         )
         if creada:
-            Pago.objects.create(
+            pago = Pago.objects.create(
                 reserva=reserva,
                 tipo=TipoPago.SENA,
                 monto=Decimal("45000.00"),
-                estado=EstadoPago.APROBADO,
                 proveedor="fake",
                 referencia_externa="demo-sena-0001",
             )
-            reserva.transicionar(EstadoReserva.CONFIRMADA)
+            # Aprobar la seña confirma la reserva automáticamente (ver
+            # Pago.transicionar en apps/pagos/models.py).
+            pago.transicionar(EstadoPago.APROBADO)
 
         self.stdout.write(self.style.SUCCESS("Datos de demo cargados:"))
         self.stdout.write("  admin de Django : admin / admin")
@@ -120,8 +121,13 @@ class Command(BaseCommand):
 
 
 def _set_password(user, raw_password: str) -> None:
-    """Fija la contraseña solo si el usuario no tiene una (primera corrida)."""
-    if not user.has_usable_password():
+    """Fija la contraseña si el usuario todavía no puede loguearse con ella.
+
+    No alcanza con `has_usable_password()`: `get_or_create` deja el campo
+    `password` en `""`, que cuenta como "usable" y dejaría al usuario sin
+    poder loguearse. `check_password` es idempotente y no re-hashea.
+    """
+    if not user.check_password(raw_password):
         user.set_password(raw_password)
         user.save(update_fields=["password"])
 

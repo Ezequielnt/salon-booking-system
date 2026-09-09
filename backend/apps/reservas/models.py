@@ -109,8 +109,16 @@ class Reserva(models.Model):
         return f"Reserva #{self.pk} · {cuando} ({self.get_estado_display()})"
 
     def clean(self):
-        if self.inicio and self.fin and self.inicio >= self.fin:
-            raise ValidationError("El inicio debe ser anterior al fin.")
+        if self.inicio and self.fin:
+            if self.inicio >= self.fin:
+                raise ValidationError("El inicio debe ser anterior al fin.")
+            if self.espacio_id and not self.espacio.esta_disponible(
+                self.inicio, self.fin, excluir_reserva_id=self.pk
+            ):
+                raise ValidationError(
+                    "El espacio no está disponible en ese horario "
+                    "(fuera de horario, bloqueado, o ya reservado)."
+                )
 
     # --- Máquina de estados --------------------------------------------
     def transicionar(self, nuevo_estado: str, *, guardar: bool = True) -> None:

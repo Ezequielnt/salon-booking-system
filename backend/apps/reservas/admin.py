@@ -8,6 +8,7 @@ from .models import EstadoReserva, Reserva, TransicionInvalida
 class PagoInline(admin.TabularInline):
     model = Pago
     extra = 0
+    readonly_fields = ("estado",)
 
 
 @admin.register(Reserva)
