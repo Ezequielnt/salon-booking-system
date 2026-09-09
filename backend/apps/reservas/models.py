@@ -132,6 +132,12 @@ class Reserva(models.Model):
         if guardar:
             self.save(update_fields=["estado", "actualizado_en"])
 
+        from .signals import reserva_transicionada
+
+        reserva_transicionada.send(
+            sender=type(self), reserva=self, anterior=actual, nuevo=destino
+        )
+
     # --- Reglas de negocio ------------------------------------------
     @property
     def puede_cancelarse(self) -> bool:

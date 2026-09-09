@@ -1,0 +1,15 @@
+Hola {{ cliente }},
+
+Tu reserva en {{ salon }} quedó confirmada.
+
+  Espacio:  {{ espacio }}
+  Fecha:    {{ inicio|date:"l j \d\e F Y" }}
+  Horario:  {{ inicio|time:"H:i" }} a {{ fin|time:"H:i" }}
+  Total:    $ {{ monto_total }}
+  Seña pagada:      $ {{ total_pagado }}
+  Saldo pendiente:  $ {{ saldo_pendiente }}
+
+Podés abonar el saldo hasta el día del evento.
+
+Gracias,
+{{ salon }}

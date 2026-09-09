@@ -1,0 +1,11 @@
+Hola {{ cliente }},
+
+Te recordamos tu reserva en {{ salon }} para mañana.
+
+  Espacio:  {{ espacio }}
+  Fecha:    {{ inicio|date:"l j \d\e F Y" }}
+  Horario:  {{ inicio|time:"H:i" }} a {{ fin|time:"H:i" }}
+  Saldo pendiente:  $ {{ saldo_pendiente }}
+
+Te esperamos.
+{{ salon }}

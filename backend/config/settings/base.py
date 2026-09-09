@@ -10,6 +10,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 # backend/config/settings/base.py  ->  backend/
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -167,7 +168,20 @@ CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/1")
 CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 60
-CELERY_BEAT_SCHEDULE: dict = {}
+# Con EAGER las tasks corren sincrónicas, sin worker ni broker (útil en tests).
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_TASK_EAGER_PROPAGATES = True
+
+CELERY_BEAT_SCHEDULE = {
+    "enviar-recordatorios": {
+        "task": "apps.notificaciones.tasks.enviar_recordatorios",
+        "schedule": crontab(minute="*/30"),
+    },
+    "completar-reservas-vencidas": {
+        "task": "apps.notificaciones.tasks.completar_reservas_vencidas",
+        "schedule": crontab(minute=15, hour=3),
+    },
+}
 
 # --- Email ---------------------------------------------------------
 
